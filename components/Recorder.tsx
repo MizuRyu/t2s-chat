@@ -20,6 +20,7 @@ export const Recorder = ({ uploadAudio }: { uploadAudio: (blob: Blob) => void })
   useEffect(() => {
     getMicrophonePermission()
   }, [])
+
   // マイクの使用許可/拒否
   const getMicrophonePermission = async () => {
     if ('MediaRecorder' in window) {
@@ -56,20 +57,58 @@ export const Recorder = ({ uploadAudio }: { uploadAudio: (blob: Blob) => void })
     setAudioChunks(localAudioChunks)
   }
 
+  const stopRecording = async () => {
+    if (mediaRecorder.current === null || pending) return
+
+    setRecordingStatus('inactive')
+    mediaRecorder.current.stop()
+    mediaRecorder.current.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: mimeType })
+      const audioUrl = URL.createObjectURL(audioBlob)
+      uploadAudio(audioBlob)
+      setAudioChunks([])
+    }
+  }
+
   return (
     <div
       className="flex item-center justify-center
   text-white"
     >
       {!permission && <button onClick={getMicrophonePermission}>音声の使用を許可します。</button>}
+
       {pending && (
+        <Image
+          alt="recorder"
+          src={notActiveAssistantIcon}
+          height={350}
+          width={350}
+          priority
+          className="assistant grayscale cursor-not-allowed"
+        />
+      )}
+
+      {permission && recordingStatus === 'inactive' && !pending && (
+        <Image
+          alt="recorder"
+          src={notActiveAssistantIcon}
+          height={350}
+          width={350}
+          onClick={startRecording}
+          priority
+          className="assistant cursor-pointer hover:scale-110 duration-150 transition-all ease-in-out"
+        />
+      )}
+
+      {recordingStatus === 'recording' && (
         <Image
           alt="recorder"
           src={activeAssistantIcon}
           height={350}
           width={350}
+          onClick={stopRecording}
           priority
-          className="grayscale"
+          className="assistant cursor-pointer hover:scale-110 duration-150 transition-all ease-in-out"
         />
       )}
     </div>

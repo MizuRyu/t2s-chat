@@ -1,16 +1,46 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import Image from 'next/image'
 
 import { SettingsIcon } from 'lucide-react'
 import { Messages } from '@/components/Messages'
 import { Recorder } from '@/components/Recorder'
+import { useFormState } from 'react-dom'
+import transcript from '@/actions/transcript'
+import { VoiceSynthesizer } from '@/components/VoiceSynthesizer'
+
+const initialState = {
+  sender: '',
+  response: '',
+  id: '',
+}
+
+export type Message = {
+  sender: string;
+  response: string;
+  id: string;
+}
 
 export default function Home() {
   const fileRef = useRef<HTMLInputElement | null>(null)
   const submitButtonRef = useRef<HTMLButtonElement | null>(null)
+  const [state, formAction] = useFormState(transcript, initialState)
+  const [messages, setMessages] = useState<Message[]>([])
+
+  useEffect(() => {
+    if (state.response && state.sender) {
+      setMessages(messages => [
+        {
+          sender: state.sender || "",
+          response: state.response || "",
+          id: state.id || "",
+        },
+        ...messages
+      ])
+    }
+  }, [state])
 
   // ボタン押下で音声ファイルをアップロードする
   const uploadAudio = (blob: Blob) => {
@@ -45,9 +75,9 @@ export default function Home() {
         />
       </header>
       {/* Form */}
-      <form className="flex flex-col bg-black">
+      <form action={formAction} className="flex flex-col bg-black">
         <div className="flex-1 bg-gradient-to-b from-slate-400 to-black">
-          <Messages />
+          <Messages messages={messages} />
         </div>
 
         <input type="file" name="audio" hidden ref={fileRef} />

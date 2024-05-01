@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+
+  .message {
+    @apply text-black p-4 rounded-lg w-fit;
+  }
+
+  .assistant {
+    @apply h-40 w-40 object-contain;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
