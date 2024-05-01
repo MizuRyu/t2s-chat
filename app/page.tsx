@@ -28,6 +28,7 @@ export default function Home() {
   const submitButtonRef = useRef<HTMLButtonElement | null>(null)
   const [state, formAction] = useFormState(transcript, initialState)
   const [messages, setMessages] = useState<Message[]>([])
+  const [displaySettings, setDisplaySettings] = useState(false)
 
   useEffect(() => {
     if (state.response && state.sender) {
@@ -62,6 +63,8 @@ export default function Home() {
     }
   }
 
+  console.log("messages: ", messages)
+
   return (
     <main className="bg-slate-100 h-screen overflow-y-auto">
       {/* header */}
@@ -72,6 +75,7 @@ export default function Home() {
           size={40}
           className="p-2 m-2 rounded-full cursor-pointer bg-slate-400 text-black
           transition-all ease-in-out duration-150 hover:bg-slate-700 hover:text-white "
+          onClick={() => setDisplaySettings(!displaySettings)}
         />
       </header>
       {/* Form */}
@@ -87,7 +91,12 @@ export default function Home() {
           {/* Recorder */}
           <Recorder uploadAudio={uploadAudio} />
 
-          <div>{/* Voice -output */}</div>
+          <div>
+            <VoiceSynthesizer 
+              state={state}
+              displaySettings={displaySettings}
+            />
+          </div>
         </div>
       </form>
     </main>
